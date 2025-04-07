@@ -1,4 +1,4 @@
-# DyslexiaProject
+# WordPal
 Grand Challenges 2025
 
 Workflow
