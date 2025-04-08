@@ -7,6 +7,7 @@ function App() {
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [definitions, setDefinitions] = useState({});
+  const [playerName, setPlayerName] = useState('');
 
   useEffect(() => {
     const loadVoices = () => {
@@ -34,6 +35,8 @@ function App() {
   };
 
   const handleSubmit = async (event) => {
+    event.preventDefault();
+
     if ('speechSynthesis' in window) {
       const speech = new SpeechSynthesisUtterance(text);
       speech.lang = 'en-US';  // Set language
@@ -64,6 +67,30 @@ function App() {
     }
   };
 
+  const savePlayerData = () => {
+    const playerData = {
+      name: playerName,
+      text,
+      selectedVoice: selectedVoice?.name || '',
+      definitions,
+    };
+    localStorage.setItem('playerData', JSON.stringify(playerData));
+    alert('Data saved!');
+  };
+
+  const loadPlayerData = () => {
+    const savedData = localStorage.getItem('playerData');
+    if (savedData) {
+      const playerData = JSON.parse(savedData);
+      setPlayerName(playerData.name);
+      setText(playerData.text);
+      setSelectedVoice(voices.find(voice => voice.name === playerData.selectedVoice));
+      setDefinitions(playerData.definitions);
+    } else {
+      alert('No saved data found.');
+    }
+  }
+
   const words = text.split(/\s+/).map((word, idx) => (
     <span key={idx} className="word-tooltip" onClick={() => fetchDefinition(word.toLowerCase())}>
       {word}
@@ -74,9 +101,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-blue-100 text-center p-10">
+      <link href="https://fonts.googleapis.com/css2?family=Open+Dyslexic&display=swap" rel="stylesheet"></link>
       <div className="container-container">
         <h1 className="text-4xl font-bold text-blue-800 mb-4">
-          Welcome to WordPal!
+          Welcome to WordCat!
         </h1>
         <img
             src="https://c.tenor.com/F4PgfnPAGdUAAAAC/cute-cat.gif"
@@ -86,8 +114,19 @@ function App() {
           />
         </div>
         <p className="text-xl text-gray-700">
-          Helping kids break down words and understand texts.
+          Breaking down complex texts into digestible pieces, one word at a time!
         </p>
+
+        <div>
+          <h1>Player Name:</h1>
+          <input
+            type="text"
+            value={playerName}
+            onChange={(e) => setPlayerName(e.target.value)}
+            placeholder="Enter your name"
+          />
+        </div>
+
         <div className="text-input-container">
           <h1>Input a text of your choice:</h1>
           <textarea
@@ -116,6 +155,11 @@ function App() {
           ></textarea>
           <button type="submit">Convert to Speech</button>
         </form>
+      </div>
+
+      <div>
+        <button onClick={savePlayerData}>Save Data</button>
+        <button onClick={loadPlayerData}>Load Data</button>
       </div>
     </div>
   );

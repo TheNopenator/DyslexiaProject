@@ -1,8 +1,6 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Open Dyslexic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: TURQUOISE;
@@ -82,10 +80,12 @@ code {
 
 .h1 {
   font-size: 2rem;
+  font-family: 'Open Dyslexic', sans-serif;
 }
 
 .p {
   font-size: 1.5rem;
+  font-family: 'Open Dyslexic', sans-serif;
 }
 
 #cat-gif {

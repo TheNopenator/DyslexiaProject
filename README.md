@@ -1,4 +1,4 @@
-# WordPal
+# WordCat
 Grand Challenges 2025
 
 Workflow
