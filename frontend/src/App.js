@@ -1,10 +1,33 @@
-import logo from './logo.svg';
 import './App.css';
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {
   const [text, setText] = useState('');
+  const [voices, setVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState(null);
+  const [definitions, setDefinitions] = useState({});
+
+  useEffect(() => {
+    const loadVoices = () => {
+      const availableVoices = speechSynthesis.getVoices();
+      setVoices(availableVoices);
+
+      const femaleVoice = availableVoices.find(voice => 
+        voice.name.toLowerCase().includes("female") ||
+        voice.name.toLowerCase().includes("samantha") ||
+        voice.name.toLowerCase().includes("zira") ||
+        voice.name.toLowerCase().includes("google us english")
+      );
+
+      if (femaleVoice) {
+        setSelectedVoice(femaleVoice);
+      }
+    };
+
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    }, []);
 
   const handleInputChange = (event) => {
     setText(event.target.value);
@@ -17,45 +40,83 @@ function App() {
       speech.volume = 1;      // Volume (0 to 1)
       speech.rate = 0.5;        // Speed (0.1 to 10)
       speech.pitch = 1;       // Pitch (0 to 2)
-
+      speech.voice = selectedVoice;
       window.speechSynthesis.speak(speech);
     } else {
       alert('Your browser does not support text-to-speech.');
     }
   };
+
+  const handleChange = (e) => {
+    setText(e.target.value);
+  };
+
+  const fetchDefinition = async (word) => {
+    if (!definitions[word]) {
+      try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        const data = await res.json();
+        const def = data[0]?.meanings[0]?.definitions[0]?.definition || 'No definition found.';
+        setDefinitions((prev) => ({...prev, [word]: def }));
+      } catch (err) {
+        setDefinitions((prev) => ({...prev, [word]: 'Error fetching definition.' }));
+      }
+    }
+  };
+
+  const words = text.split(/\s+/).map((word, idx) => (
+    <span key={idx} className="word-tooltip" onClick={() => fetchDefinition(word.toLowerCase())}>
+      {word}
+      <span className="tooltip">
+        {definitions[word.toLowerCase()]}</span>{' '}
+      </span>
+  ));
+
   return (
     <div className="min-h-screen bg-blue-100 text-center p-10">
-      <h1 className="text-4xl font-bold text-blue-800 mb-4">
-        Welcome to WordPal!
-      </h1>
-      <p className="text-xl text-gray-700">
-        Helping kids break down words and understand texts.
-      </p>
-      <div className="text-input-container">
-        <h1>Input a text of your choice:</h1>
-        <textarea
-          className="text-input"
-          rows="4"
-          cols="50"
-          placeholder="Type your text here..."
-        ></textarea>
-        <button className="submit-button">
-          Submit
-        </button>
+      <div className="container-container">
+        <h1 className="text-4xl font-bold text-blue-800 mb-4">
+          Welcome to WordPal!
+        </h1>
+        <img
+            src="https://c.tenor.com/F4PgfnPAGdUAAAAC/cute-cat.gif"
+            alt="Cute cat gif"
+            className="w-32 rounded-xl shadow-lg"
+            id="cat-gif"
+          />
+        </div>
+        <p className="text-xl text-gray-700">
+          Helping kids break down words and understand texts.
+        </p>
+        <div className="text-input-container">
+          <h1>Input a text of your choice:</h1>
+          <textarea
+            className="text-input"
+            rows="4"
+            cols="50"
+            placeholder="Type your text here..."
+            value={text}
+            onChange={handleChange}
+          ></textarea>
+          <button className="submit-button">
+            Submit
+          </button>
+          <div className="text-display">
+            {words}</div>
+        </div>
+        <div className="text-to-speech-container">
+        <h1>Text to Speech</h1>
+        <form onSubmit={handleSubmit}>
+          <textarea
+            value={text}
+            onChange={handleInputChange}
+            rows="4"
+            cols="50"
+            placeholder="Type your text here..."
+          ></textarea>
+          <button type="submit">Convert to Speech</button>
+        </form>
       </div>
-      <div className="text-to-speech-container">
-      <h1>Text to Speech</h1>
-      <form onSubmit={handleSubmit}>
-        <textarea
-          value={text}
-          onChange={handleInputChange}
-          rows="4"
-          cols="50"
-          placeholder="Type your text here..."
-        ></textarea>
-        <button type="submit">Convert to Speech</button>
-      </form>
-    </div>
     </div>
   );
 }

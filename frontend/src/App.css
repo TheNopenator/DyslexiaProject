@@ -6,6 +6,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: TURQUOISE;
+  padding-left: 50px;
 }
 
 code {
@@ -50,4 +51,63 @@ code {
   to {
     transform: rotate(360deg);
   }
+}
+
+.word-tooltip {
+  position: relative;
+  cursor: pointer;
+  color: #1e3a8a;
+  font-weight: 500;
+}
+
+.tooltip {
+  visibility: hidden;
+  position: absolute;
+  background-color: #fff;
+  color: #333;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  top: 1.5em;
+  left: 0;
+  white-space: nowrap;
+  z-index: 10;
+  font-size: 0.875rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.word-tooltip:hover .tooltip {
+  visibility: visible;
+}
+
+.h1 {
+  font-size: 2rem;
+}
+
+.p {
+  font-size: 1.5rem;
+}
+
+#cat-gif {
+  width: 120px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.container-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+.text-section {
+  flex: 1;
+}
+
+.gif-section {
+  margin-left: 16px;
 }
