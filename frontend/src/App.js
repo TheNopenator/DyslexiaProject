@@ -1,3 +1,4 @@
+// set NODE_OPTIONS=--openssl-legacy-provider && npm start
 import './App.css';
 import React from 'react';
 import { useState, useEffect } from 'react';
