@@ -111,3 +111,9 @@ code {
 .gif-section {
   margin-left: 16px;
 }
+
+.button-group {
+  display: flex;
+  gap: 10px; /* or any value you like */
+  justify-content: center;
+}

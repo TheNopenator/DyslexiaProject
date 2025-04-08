@@ -61,10 +61,27 @@ function App() {
         const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
         const data = await res.json();
         const def = data[0]?.meanings[0]?.definitions[0]?.definition || 'No definition found.';
-        setDefinitions((prev) => ({...prev, [word]: def }));
+        const phonetic = data[0]?.phonetics?.find(p => p.text)?.text || 'No pronunciation found.';
+
+        setDefinitions((prev) => ({...prev, [word]: {def, phonetic } }));
       } catch (err) {
-        setDefinitions((prev) => ({...prev, [word]: 'Error fetching definition.' }));
+        setDefinitions((prev) => ({...prev, [word]: {
+          def: 'Error fetching definition.', phonetic: '' 
+          }
+        }));
       }
+    }
+
+    if ('speechSynthesis' in window) {
+      const speech = new SpeechSynthesisUtterance(word);
+      speech.lang = 'en-US';  // Set language
+      speech.volume = 1;      // Volume (0 to 1)
+      speech.rate = 0.75;        // Speed (0.1 to 10)
+      speech.pitch = 1.5;       // Pitch (0 to 2)
+      speech.voice = selectedVoice;
+      window.speechSynthesis.speak(speech);
+    } else {
+      alert('Your browser does not support text-to-speech.');
     }
   };
 
@@ -92,13 +109,21 @@ function App() {
     }
   }
 
-  const words = text.split(/\s+/).map((word, idx) => (
-    <span key={idx} className="word-tooltip" onClick={() => fetchDefinition(word.toLowerCase())}>
-      {word}
-      <span className="tooltip">
-        {definitions[word.toLowerCase()]}</span>{' '}
+  const words = text.split(/\s+/).map((word, idx) => {
+    const defObj = definitions[word.toLowerCase()];
+    const phon = definitions[word.toLowerCase()]?.phonetic;
+    const def = defObj?.def;
+
+    return (
+      <span key={idx} className="word-tooltip" onClick={() => fetchDefinition(word.toLowerCase())}>
+        {word}
+        <span className="tooltip">
+          {phon && <span className="phonetic">{phon}</span>}<br />
+          {def || 'Click to define'}
+          </span>{' '}
       </span>
-  ));
+    );
+  });
 
   return (
     <div className="min-h-screen bg-blue-100 text-center p-10">
@@ -154,7 +179,12 @@ function App() {
             cols="50"
             placeholder="Type your text here..."
           ></textarea>
-          <button type="submit">Convert to Speech</button>
+          <div className="button-group">
+            <button type="submit">Convert to Speech</button>
+            <button type="button" onClick={() => window.speechSynthesis.pause()}>Pause</button>
+            <button type="button" onClick={() => window.speechSynthesis.resume()}>Resume</button>
+            <button type="button" onClick={() => window.speechSynthesis.cancel()}>Stop</button>
+          </div>
         </form>
       </div>
 
