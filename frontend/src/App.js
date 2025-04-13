@@ -186,6 +186,17 @@ function App() {
             <button type="button" onClick={() => window.speechSynthesis.cancel()}>Stop</button>
           </div>
         </form>
+        <div className="chatbot-container bg-white p-4 rounded-xl shadow-md max-w-md mx-auto mt-10">
+          <h2 className="text-xl font-bold text-blue-800 mb-2">😺 Ask WordCat!</h2>
+          <div className="chat-window h-48 overflow-y-auto border p-2 mb-2 rounded">
+            <p><strong>WordCat:</strong> Hi there! I'm here to help you understand texts. 🐾</p>
+          </div>
+          <input
+            type="text"
+            className="w-full border rounded p-2"
+            placeholder="Ask me anything..."
+          />
+        </div>
       </div>
 
       <div>

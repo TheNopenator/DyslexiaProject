@@ -3,7 +3,7 @@ body {
   font-family: 'Open Dyslexic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: TURQUOISE;
+  background-color: rgb(255, 255, 255);
   padding-left: 50px;
 }
 
@@ -116,4 +116,12 @@ code {
   display: flex;
   gap: 10px; /* or any value you like */
   justify-content: center;
+}
+
+.chatbot-container {
+  font-family: 'Open Dyslexic', sans-serif;
+}
+
+.chat-window {
+  background-color: #f0f8ff;
 }
