@@ -2,6 +2,7 @@
 import './App.css';
 import React from 'react';
 import { useState, useEffect } from 'react';
+import Chatbot from './Chatbot';
 
 function App() {
   const [text, setText] = useState('');
@@ -196,6 +197,7 @@ function App() {
             className="w-full border rounded p-2"
             placeholder="Ask me anything..."
           />
+          
         </div>
       </div>
 
