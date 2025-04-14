@@ -5,7 +5,6 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
 
-  // ⚠️ Replace with your own secure key OR proxy in production
   const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
 
   const systemMessage = {
@@ -59,15 +58,13 @@ const Chatbot = () => {
         
         const chatHistory = [systemMessage, ...messages, newMessage];
   
-        const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        const res = await fetch("http://localhost:5000/api/chat", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "gpt-4o",
-            messages: chatHistory,
+            messages: chatHistory
           }),
         });
   
