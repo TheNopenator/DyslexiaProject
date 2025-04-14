@@ -114,8 +114,7 @@ code {
 
 .button-group {
   display: flex;
-  gap: 10px; /* or any value you like */
-  justify-content: center;
+  gap: 10px;
 }
 
 .chatbot-container {

@@ -6,7 +6,7 @@ const Chatbot = () => {
   const [input, setInput] = useState("");
 
   // ⚠️ Replace with your own secure key OR proxy in production
-  const apiKey = "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";
+  const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
 
   const systemMessage = {
     role: "system",
@@ -24,16 +24,12 @@ const Chatbot = () => {
     setInput("");
 
     try {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      const res = await fetch("http://localhost:5000/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-          model: "gpt-4o",
-          messages: chatHistory,
-        }),
+        body: JSON.stringify({ messages: chatHistory }),
       });
 
       const data = await res.json();
@@ -42,7 +38,7 @@ const Chatbot = () => {
         throw new Error(data.error.message || "Something went wrong!");
       }
 
-      const botResponse = data.choices[0].message;
+      const botResponse = data;
       setMessages((prev) => [...prev, botResponse]);
     } catch (err) {
       setMessages((prev) => [
@@ -76,7 +72,7 @@ const Chatbot = () => {
         });
   
         const data = await res.json();
-        const botResponse = data.choices[0].message;
+        const botResponse = data;
         setMessages((prev) => [...prev, botResponse]);
       } catch (err) {
         setMessages((prev) => [
