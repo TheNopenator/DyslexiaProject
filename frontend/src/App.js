@@ -192,12 +192,7 @@ function App() {
           <div className="chat-window h-48 overflow-y-auto border p-2 mb-2 rounded">
             <p><strong>WordCat:</strong> Hi there! I'm here to help you understand texts. 🐾</p>
           </div>
-          <input
-            type="text"
-            className="w-full border rounded p-2"
-            placeholder="Ask me anything..."
-          />
-          
+          <Chatbot />
         </div>
       </div>
 
