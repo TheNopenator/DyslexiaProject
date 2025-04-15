@@ -11,6 +11,9 @@ import {
 const Chatbot = ({ studentName }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [selectedVoice, setSelectedVoice] = useState(null);
+  const [text, setText] = useState('');
+  const [voices, setVoices] = useState([]);
 
   const systemMessage = {
     role: "system",
@@ -66,6 +69,29 @@ const Chatbot = ({ studentName }) => {
       }
 
       const botResponse = data;
+
+      const availableVoices = speechSynthesis.getVoices();
+      setVoices(availableVoices);
+
+      const femaleVoice = availableVoices.find(voice => 
+        voice.name.toLowerCase().includes("female") ||
+        voice.name.toLowerCase().includes("samantha") ||
+        voice.name.toLowerCase().includes("zira") ||
+        voice.name.toLowerCase().includes("google us english")
+      );
+
+      if ('speechSynthesis' in window) {
+        const speech = new SpeechSynthesisUtterance(botResponse.content);
+        speech.lang = 'en-US';  // Set language
+        speech.volume = 1;      // Volume (0 to 1)
+        speech.rate = 0.75;        // Speed (0.1 to 10)
+        speech.pitch = 1;       // Pitch (0 to 2)
+        speech.voice = femaleVoice || selectedVoice;
+        window.speechSynthesis.speak(speech);
+      } else {
+        alert('Your browser does not support text-to-speech.');
+      }
+
       setMessages((prev) => [...prev, botResponse]);
 
       await saveMessage(studentName, userMessage);

@@ -3,7 +3,7 @@ body {
   font-family: 'Open Dyslexic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: rgb(255, 255, 255);
+  background-color: #7dc1ea;
   padding-left: 50px;
 }
 
@@ -94,14 +94,14 @@ code {
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   margin-left: 20px;
-  margin-top: 10px;
+  margin-top: 5px;
 }
 
 .container-container {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .text-section {
@@ -123,4 +123,22 @@ code {
 
 .chat-window {
   background-color: #f0f8ff;
+}
+
+button {
+  margin: 5px;
+  padding: 6px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(to right, #3f729f, #164772);
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+input {
+  border-radius: 8px;
+  padding: 8px 12px;
 }
