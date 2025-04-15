@@ -145,7 +145,7 @@ function App() {
         </p>
 
         <div>
-          <h1>Player Name:</h1>
+          <h1>Your Name:</h1>
           <input
             type="text"
             value={playerName}
@@ -192,7 +192,7 @@ function App() {
           <div className="chat-window h-48 overflow-y-auto border p-2 mb-2 rounded">
             <p><strong>WordCat:</strong> Hi there! I'm here to help you understand texts. 🐾</p>
           </div>
-          <Chatbot />
+          <Chatbot studentName={playerName} />
         </div>
       </div>
 
