@@ -3,6 +3,17 @@ import './App.css';
 import React from 'react';
 import { useState, useEffect } from 'react';
 import Chatbot from './Chatbot';
+import { db } from './firebase';
+import dayjs from "dayjs";
+import {
+  collection,
+  addDoc,
+  doc,
+  getDocs,
+  getDoc,
+  updateDoc,
+  setDoc
+} from "firebase/firestore";
 
 function App() {
   const [text, setText] = useState('');
@@ -10,6 +21,12 @@ function App() {
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [definitions, setDefinitions] = useState({});
   const [playerName, setPlayerName] = useState('');
+  const [dailyStreak, setDailyStreak] = useState(0);
+  const [lastLogin, setLastLogin] = useState(null);
+  const [stars, setStars] = useState(0);
+  const [showReward, setShowReward] = useState(true);
+  const [currentWordIndex, setCurrentWordIndex] = useState(null);
+  const [words, setWords] = useState([]);
 
   useEffect(() => {
     const loadVoices = () => {
@@ -38,14 +55,53 @@ function App() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    
+    if (!text.trim()) return;
+  
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+  
       const speech = new SpeechSynthesisUtterance(text);
-      speech.lang = 'en-US';  // Set language
-      speech.volume = 1;      // Volume (0 to 1)
-      speech.rate = 0.5;        // Speed (0.1 to 10)
-      speech.pitch = 1;       // Pitch (0 to 2)
+      speech.lang = 'en-US';
+      speech.volume = 1;
+      speech.rate = 0.5;
+      speech.pitch = 1;
       speech.voice = selectedVoice;
+  
+      const words = text.split(/\s+/).filter(w => w.length > 0);
+      let wordBoundaries = [];
+      let pos = 0;
+      
+      words.forEach(word => {
+        wordBoundaries.push({
+          start: pos,
+          end: pos + word.length,
+          word: word
+        });
+        pos += word.length + 1;
+      });
+  
+      speech.onboundary = (event) => {
+        if (event.name === 'word') {
+          const charIndex = event.charIndex;
+          const currentWord = wordBoundaries.find(
+            w => charIndex >= w.start && charIndex < w.end
+          );
+          
+          if (currentWord) {
+            const wordIndex = words.indexOf(currentWord.word);
+            if (wordIndex !== -1 && wordIndex !== currentWordIndex) {
+              setCurrentWordIndex(wordIndex);
+            }
+          }
+        }
+      };
+  
+      speech.onend = () => {
+        setCurrentWordIndex(null);
+      };
+  
+      setCurrentWordIndex(null);
       window.speechSynthesis.speak(speech);
     } else {
       alert('Your browser does not support text-to-speech.');
@@ -53,7 +109,9 @@ function App() {
   };
 
   const handleChange = (e) => {
-    setText(e.target.value);
+    const newText = e.target.value;
+    setText(newText);
+    setWords(newText.split(/\s+/).filter(word => word.length > 0));
   };
 
   const fetchDefinition = async (word) => {
@@ -108,23 +166,83 @@ function App() {
     } else {
       alert('No saved data found.');
     }
-  }
+  };
 
-  const words = text.split(/\s+/).map((word, idx) => {
-    const defObj = definitions[word.toLowerCase()];
-    const phon = definitions[word.toLowerCase()]?.phonetic;
-    const def = defObj?.def;
-
+  const renderedWords = text.split(/\s+/).map((word, idx) => {
+    const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '');
+    const defObj = definitions[cleanWord];
+    
     return (
-      <span key={idx} className="word-tooltip" onClick={() => fetchDefinition(word.toLowerCase())}>
+      <span 
+        key={`${word}-${idx}`}
+        className={`
+          word-tooltip 
+          ${currentWordIndex === idx ? 'highlighted-word' : ''}
+        `}
+        onClick={() => fetchDefinition(cleanWord)}
+      >
         {word}
-        <span className="tooltip">
-          {phon && <span className="phonetic">{phon}</span>}<br />
-          {def || 'Click to define'}
-          </span>{' '}
+        {defObj && (defObj.def || defObj.phonetic) && (
+          <span className="tooltip">
+            {defObj.phonetic && <span className="phonetic">{defObj.phonetic}</span>}
+            {defObj.def &&  (
+              <>
+                <br />
+                {defObj.def}
+              </>
+            )}
+          </span>
+        )}
+        {' '}
       </span>
     );
   });
+
+  useEffect(() => {
+    const updateRewards = async () => {
+      if (!playerName) return;
+
+      const ref = doc(db, "students", playerName);
+      const snap = await getDoc(ref);
+      const today = dayjs().format('YYYY-MM-DD');
+
+      if (!snap.exists()) {
+        await setDoc(ref, {
+          stars: 5,
+          dailyStreak: 1,
+          lastLoginDate: today,
+        });
+        setStars(5);
+        setDailyStreak(1);
+        setLastLogin(today);
+        return;
+      }
+  
+      if (snap.exists()) {
+        const data = snap.data();
+
+        if (data.lastLoginDate !== today) {
+          let newStreak = 1;
+          if (dayjs(today).diff(dayjs(data.lastLoginDate), 'day') === 1) {
+            newStreak = data.dailyStreak + 1;
+          }
+          await updateDoc(ref, {
+            stars: data.stars + 5,
+            dailyStreak: newStreak,
+            lastLoginDate: today,
+          });
+          setStars(data.stars + 5);
+          setDailyStreak(newStreak);
+        } else {
+          setStars(data.stars);
+          setDailyStreak(data.dailyStreak);
+        }
+        setLastLogin(data.lastLoginDate);
+      }
+    };
+    updateRewards();
+    }, [playerName]
+  );
 
   return (
     <div className="min-h-screen bg-blue-100 text-center p-10">
@@ -164,11 +282,14 @@ function App() {
             value={text}
             onChange={handleChange}
           ></textarea>
-          <button className="submit-button">
+          <button className="submit-button" onClick={handleSubmit}>
             Submit
           </button>
-          <div className="text-display">
-            {words}</div>
+          {text && (
+            <div className="text-display">
+              {renderedWords}
+            </div>
+          )}
         </div>
         <div className="text-to-speech-container">
         <h1>Text to Speech</h1>
@@ -199,6 +320,16 @@ function App() {
       <div>
         <button onClick={savePlayerData}>Save Data</button>
         <button onClick={loadPlayerData}>Load Data</button>
+      </div>
+
+      <div className="rewards-container">
+        {showReward && (
+          <div className="reward-popup bg-yellow-200 p-4 rounded shadow-md mt-4 transition-opacity duration-500 ease-in-out">
+          🌟 You earned 5 stars today! Keep it up!
+          <br />
+          🔥 1-day streak! You're on fire!
+          </div>
+        )}
       </div>
     </div>
   );
